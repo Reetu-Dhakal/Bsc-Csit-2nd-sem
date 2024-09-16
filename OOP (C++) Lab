@@ -1154,3 +1154,395 @@ int main() {
     cout << "Division of float datatype is : " << result3 << endl;
     return 0;
 }
+
+Lab 7:
+
+1. 
+1) WAP to create file named student-records.txt and insert contents to it.
+Content:
+1 Ram 30
+2 Shyam 29
+3 Sita 25
+
+#include <iostream>
+#include <fstream> 
+using namespace std;
+
+int main() {
+    const char* filename = "student_records.txt";
+    ofstream file(filename);
+    if (!file) {
+        cerr << "Error: Could not open file " << filename <<endl;
+        return 1;
+    }
+    file << "1 Ram 30\n";
+    file << "2 Shyam 29\n";
+    file << "3 Sita 25\n";
+
+    // Close the file
+    file.close();
+
+    std::cout << "File '" << filename << "' created and content inserted." << std::endl;
+
+    return 0;
+}
+
+2) WAP to read contents and display in console from the file student_records.txt.
+
+#include <iostream>
+#include <fstream>  // For file operations
+#include <string>   // For std::string and std::getline
+
+int main() {
+    // Define the name of the file
+    const char* filename = "student_records.txt";
+
+    // Create an input file stream object
+    std::ifstream file(filename);
+
+    // Check if the file was successfully opened
+    if (!file) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return 1; // Return an error code
+    }
+
+    // Read and display the contents of the file
+    std::string line;
+    while (std::getline(file, line)) {
+        std::cout << line << std::endl;
+    }
+
+    // Close the file
+    file.close();
+
+    return 0; // Indicate successful completion
+}
+
+3) WAP to modify the  age of Shyam from 29 to 22 that is available in the file stude_records.txt.
+
+#include <iostream>
+#include <fstream>
+#include <sstream>  // Include for std::istringstream
+#include <string>
+#include <cstdio>   // Include for std::remove and std::rename
+
+void modifyStudentAge(const std::string& filename, const std::string& name, int newAge) {
+    std::ifstream fileIn(filename); // Open the original file for reading
+    if (!fileIn) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return;
+    }
+
+    std::ofstream tempFile("temp.txt"); // Create a temporary file for writing
+    if (!tempFile) {
+        std::cerr << "Error: Could not create temporary file" << std::endl;
+        fileIn.close();
+        return;
+    }
+
+    std::string line;
+    while (std::getline(fileIn, line)) {
+        std::istringstream lineStream(line);
+        std::string id, studentName;
+        int age;
+
+        if (lineStream >> id >> studentName >> age) {
+            if (studentName == name) {
+                age = newAge; // Update the age for the specified student
+            }
+            // Write the line to the temporary file
+            tempFile << id << " " << studentName << " " << age << std::endl;
+        }
+    }
+
+    fileIn.close();  // Close the original file
+    tempFile.close(); // Close the temporary file
+
+    // Replace the original file with the modified temporary file
+    if (std::remove(filename.c_str()) != 0) {
+        std::cerr << "Error: Could not delete the original file" << std::endl;
+        return;
+    }
+    if (std::rename("temp.txt", filename.c_str()) != 0) {
+        std::cerr << "Error: Could not rename the temporary file" << std::endl;
+        return;
+    }
+
+    std::cout << "Age of " << name << " modified to " << newAge << " in file " << filename << std::endl;
+}
+
+int main() {
+    // Define the filename, student name, and new age
+    const std::string filename = "student_records.txt";
+    const std::string studentName = "Shyam";
+    const int newAge = 22;
+
+    // Modify the age
+    modifyStudentAge(filename, studentName, newAge);
+
+    return 0;
+}
+
+4)WAP to delete record of sita from file student_recors.txt and display remaining rows.
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <cstdio> // For std::remove and std::rename
+
+void deleteStudentRecord(const std::string& filename, const std::string& name) {
+    std::ifstream fileIn(filename); // Open the original file for reading
+    if (!fileIn) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return;
+    }
+
+    std::ofstream tempFile("temp.txt"); // Create a temporary file for writing
+    if (!tempFile) {
+        std::cerr << "Error: Could not create temporary file" << std::endl;
+        return;
+    }
+
+    std::string line;
+    while (std::getline(fileIn, line)) {
+        std::istringstream lineStream(line);
+        std::string id, studentName;
+        int age;
+
+        if (lineStream >> id >> studentName >> age) {
+            // Only write the line to the temporary file if it's not the record to delete
+            if (studentName != name) {
+                tempFile << id << " " << studentName << " " << age << std::endl;
+            }
+        }
+    }
+
+    fileIn.close();  // Close the original file
+    tempFile.close(); // Close the temporary file
+
+    // Replace the original file with the modified temporary file
+    if (std::remove(filename.c_str()) != 0) {
+        std::cerr << "Error: Could not delete the original file" << std::endl;
+        return;
+    }
+    if (std::rename("temp.txt", filename.c_str()) != 0) {
+        std::cerr << "Error: Could not rename the temporary file" << std::endl;
+        return;
+    }
+
+    // Display the remaining rows
+    std::ifstream updatedFile(filename);
+    if (!updatedFile) {
+        std::cerr << "Error: Could not open updated file " << filename << std::endl;
+        return;
+    }
+
+    std::cout << "Remaining records in " << filename << ":\n";
+    while (std::getline(updatedFile, line)) {
+        std::cout << line << std::endl;
+    }
+
+    updatedFile.close();
+}
+
+int main() {
+    // Define the filename and student name to delete
+    const std::string filename = "student_records.txt";
+    const std::string studentName = "Sita";
+
+    // Delete the record and display remaining records
+    deleteStudentRecord(filename, studentName);
+
+    return 0;
+}
+
+5)WAP to append content in the file named demo.txt.
+
+#include <iostream>
+#include <fstream>  // For file operations
+#include <string>
+
+void appendToFile(const std::string& filename, const std::string& content) {
+    // Open the file in append mode
+    std::ofstream fileOut(filename, std::ios::app);
+    
+    // Check if the file was successfully opened
+    if (!fileOut) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return;
+    }
+
+    // Write the content to the file
+    fileOut << content << std::endl;
+
+    // Close the file
+    fileOut.close();
+
+    std::cout << "Content appended to " << filename << std::endl;
+}
+
+int main() {
+    // Define the filename and content to append
+    const std::string filename = "demo.txt";
+    const std::string content = "This is the new content to append.";
+
+    // Append content to the file
+    appendToFile(filename, content);
+
+    return 0;
+}
+
+6)WAP to read contents from file named demo.txt and print number of characters available in that file.
+
+#include <iostream>
+#include <fstream>  // For file operations
+#include <string>
+
+int countCharactersInFile(const std::string& filename) {
+    std::ifstream fileIn(filename); // Open the file for reading
+    if (!fileIn) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return -1; // Return an error code
+    }
+
+    int charCount = 0;
+    char ch;
+    // Read the file character by character
+    while (fileIn.get(ch)) {
+        ++charCount; // Increment character count
+    }
+
+    fileIn.close(); // Close the file
+    return charCount;
+}
+
+int main() {
+    // Define the filename
+    const std::string filename = "demo.txt";
+
+    // Count characters in the file
+    int charCount = countCharactersInFile(filename);
+
+    if (charCount != -1) {
+        std::cout << "Number of characters in " << filename << ": " << charCount << std::endl;
+    }
+
+    return 0;
+}
+
+7)WAP to read contents from file named demo.txt and print number of words and number of lines available in that text.
+
+#include <iostream>
+#include <fstream>  // For file operations
+#include <sstream>  // For std::istringstream
+#include <string>
+
+void countLinesAndWords(const std::string& filename, int& numLines, int& numWords) {
+    std::ifstream fileIn(filename); // Open the file for reading
+    if (!fileIn) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return;
+    }
+
+    numLines = 0;
+    numWords = 0;
+    std::string line;
+
+    // Read the file line by line
+    while (std::getline(fileIn, line)) {
+        ++numLines; // Increment line count
+        
+        // Use a string stream to count words in the current line
+        std::istringstream lineStream(line);
+        std::string word;
+        while (lineStream >> word) {
+            ++numWords; // Increment word count
+        }
+    }
+
+    fileIn.close(); // Close the file
+}
+
+int main() {
+    // Define the filename
+    const std::string filename = "demo.txt";
+    
+    // Variables to store the number of lines and words
+    int numLines = 0;
+    int numWords = 0;
+
+    // Count lines and words in the file
+    countLinesAndWords(filename, numLines, numWords);
+
+    // Print the results
+    std::cout << "Number of lines in " << filename << ": " << numLines << std::endl;
+    std::cout << "Number of words in " << filename << ": " << numWords << std::endl;
+
+    return 0;
+}
+
+8. WAP to create two files named file1.txt and file2.txt with some text in those files .Also merge the content of those two files into the file named file3.txt.
+#include <iostream>
+#include <fstream>  // For file operations
+#include <string>
+
+// Function to create a file with some text
+void createFile(const std::string& filename, const std::string& content) {
+    std::ofstream fileOut(filename);
+    if (!fileOut) {
+        std::cerr << "Error: Could not create file " << filename << std::endl;
+        return;
+    }
+    fileOut << content;
+    fileOut.close();
+}
+
+// Function to merge two files into a third file
+void mergeFiles(const std::string& file1, const std::string& file2, const std::string& outputFile) {
+    std::ifstream fileIn1(file1);
+    if (!fileIn1) {
+        std::cerr << "Error: Could not open file " << file1 << std::endl;
+        return;
+    }
+
+    std::ifstream fileIn2(file2);
+    if (!fileIn2) {
+        std::cerr << "Error: Could not open file " << file2 << std::endl;
+        return;
+    }
+
+    std::ofstream fileOut(outputFile);
+    if (!fileOut) {
+        std::cerr << "Error: Could not create file " << outputFile << std::endl;
+        return;
+    }
+
+    // Copy contents of file1 to file3
+    std::string line;
+    while (std::getline(fileIn1, line)) {
+        fileOut << line << std::endl;
+    }
+    fileIn1.close();
+
+    // Copy contents of file2 to file3
+    while (std::getline(fileIn2, line)) {
+        fileOut << line << std::endl;
+    }
+    fileIn2.close();
+
+    fileOut.close();
+    std::cout << "Files merged into " << outputFile << std::endl;
+}
+
+int main() {
+    // Create files with some text
+    createFile("file1.txt", "This is the content of file1.");
+    createFile("file2.txt", "This is the content of file2.");
+
+    // Merge the two files into file3.txt
+    mergeFiles("file1.txt", "file2.txt", "file3.txt");
+
+    return 0;
+}
+
